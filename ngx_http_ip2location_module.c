@@ -224,49 +224,49 @@ static ngx_http_variable_t ngx_http_ip2location_vars[] = {
     {
 		ngx_string("ip2location_zipcode"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, zipcode),
+        offsetof(IP2LocationRecord, zip_code),
         0, 0
     },
 
     {
 		ngx_string("ip2location_timezone"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, timezone),
+        offsetof(IP2LocationRecord, time_zone),
         0, 0
     },
 
     {
 		ngx_string("ip2location_netspeed"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, netspeed),
+        offsetof(IP2LocationRecord, net_speed),
         0, 0
     },
 
     {
 		ngx_string("ip2location_iddcode"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, iddcode),
+        offsetof(IP2LocationRecord, idd_code),
         0, 0
     },
 
     {
 		ngx_string("ip2location_areacode"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, areacode),
+        offsetof(IP2LocationRecord, area_code),
         0, 0
     },
 
     {
 		ngx_string("ip2location_weatherstationcode"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, weatherstationcode),
+        offsetof(IP2LocationRecord, weather_station_code),
         0, 0
     },
 
     {
 		ngx_string("ip2location_weatherstationname"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, weatherstationname),
+        offsetof(IP2LocationRecord, weather_station_name),
         0, 0
     },
 
@@ -287,7 +287,7 @@ static ngx_http_variable_t ngx_http_ip2location_vars[] = {
     {
 		ngx_string("ip2location_mobilebrand"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, mobilebrand),
+        offsetof(IP2LocationRecord, mobile_brand),
         0, 0
     },
 
@@ -301,7 +301,7 @@ static ngx_http_variable_t ngx_http_ip2location_vars[] = {
     {
 		ngx_string("ip2location_usagetype"), NULL,
         ngx_http_ip2location_get_str_value,
-        offsetof(IP2LocationRecord, usagetype),
+        offsetof(IP2LocationRecord, usage_type),
         0, 0
     },
 
@@ -368,7 +368,7 @@ static void ngx_http_ip2location_exit_process(ngx_cycle_t *cycle)
         IP2Location_close(imcf->database);
 
         if (imcf->access_type == IP2LOCATION_SHARED_MEMORY) {
-            IP2Location_DB_del_shm();
+            IP2Location_delete_shm();
         }
 
         imcf->database = NULL;
@@ -401,7 +401,7 @@ void ngx_http_ip2location_cleanup(void *data)
         IP2Location_close(clean_ctx->main_cf->database);
 
         if (clean_ctx->main_cf->access_type == IP2LOCATION_SHARED_MEMORY) {
-            IP2Location_DB_del_shm();
+            IP2Location_delete_shm();
         }
 
         ngx_log_debug0(NGX_LOG_DEBUG_HTTP, clean_ctx->cycle->log, 0,
@@ -617,18 +617,18 @@ static ngx_http_ip2location_ctx_t * ngx_http_ip2location_create_ctx(ngx_http_req
                   ctx->record->latitude,
                   ctx->record->longitude,
                   ctx->record->domain,
-                  ctx->record->zipcode,
-                  ctx->record->timezone,
-                  ctx->record->netspeed,
-                  ctx->record->iddcode,
-                  ctx->record->areacode,
-                  ctx->record->weatherstationcode,
-                  ctx->record->weatherstationname,
+                  ctx->record->zip_code,
+                  ctx->record->time_zone,
+                  ctx->record->net_speed,
+                  ctx->record->idd_code,
+                  ctx->record->area_code,
+                  ctx->record->weather_station_code,
+                  ctx->record->weather_station_name,
                   ctx->record->mcc,
                   ctx->record->mnc,
-                  ctx->record->mobilebrand,
+                  ctx->record->mobile_brand,
                   ctx->record->elevation,
-                  ctx->record->usagetype);
+                  ctx->record->usage_type);
 
     cln->data = ctx->record;
     cln->handler = (ngx_pool_cleanup_pt) IP2Location_free_record;
@@ -667,8 +667,7 @@ static ngx_int_t ngx_http_ip2location_get_str_value(ngx_http_request_t *r,
     v->data = *(u_char **) ((char *) ctx->record + data);
 
     if (ngx_strcmp(v->data, NOT_SUPPORTED) == 0
-            || ngx_strcmp(v->data, INVALID_IPV4_ADDRESS) == 0 
-            || ngx_strcmp(v->data, INVALID_IPV6_ADDRESS) == 0) {
+            || ngx_strcmp(v->data, INVALID_IP_ADDRESS) == 0) {
 
         v->not_found = 1;
         return NGX_OK;
